@@ -3,3 +3,12 @@
 
 #include "MyGameInstanceCPP.h"
 
+FString UMyGameInstanceCPP::LanPlayerName() const
+{
+	return LANPlayerName;
+}
+
+void UMyGameInstanceCPP::SetLanPlayerName(const FString& LanPlayerName)
+{
+	LANPlayerName = LanPlayerName;
+}
