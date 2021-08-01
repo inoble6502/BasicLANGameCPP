@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "MyGameInstanceCPP.generated.h"
 
 /**
@@ -16,15 +17,30 @@ class BASICLANGAMECPP_API UMyGameInstanceCPP : public UGameInstance
 
 protected:
 	FString LANPlayerName;
+	TSharedPtr<FOnlineSessionSettings> SessionSettings;
 	
 public:
+	UMyGameInstanceCPP(const FObjectInitializer& ObjectInitializer);
+	
 	FString LanPlayerName() const;
 	void SetLanPlayerName(const FString& LanPlayerName);
 
-	void InstanceServerTravelToLevel(const APlayerController& pc, const FString& levelName);
-	void InstanceCreateSession(const APlayerController& pc);
-	void InstanceJoinSession(const APlayerController& pc);
-	void InstanceJoinSessionByIP(const APlayerController& pc);
-	void InstanceDestroySession(const APlayerController& pc);
-	
+	bool HostSession(TSharedPtr<FUniqueNetId> UserId,
+		FName SessionName,
+		bool bIsLAN,
+		bool bIsPresence,
+		int32 MaxNumPlayers);
+
+	//delegates for creating and starting session completion respectively
+	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
+	FOnStartSessionCompleteDelegate OnStartSessionCompleteDelegate;
+
+	//handles for creating and starting session respectively
+	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
+	FDelegateHandle OnStartSessionCompleteDelegateHandle;
+
+	//runs on completion of session create request
+	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+	//runs on completion of session start request
+	virtual void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
 };
