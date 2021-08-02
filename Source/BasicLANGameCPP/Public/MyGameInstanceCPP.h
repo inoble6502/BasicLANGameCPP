@@ -56,8 +56,12 @@ public:
 	//delegate func fired when search query for sessions is complete
 	void OnFindSessionsComplete(bool bWasSuccessful);
 
+	//these (and their defs) are copied from the base class to prevent build warnings
+	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults);
+	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult);
+	
 	//join session via a search result
-	bool JoinSession(TSharedPtr<FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
+	virtual bool JoinSession(TSharedPtr<FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
 
 	//del. for joining a session
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
@@ -65,5 +69,5 @@ public:
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 
 	//del. func run upon completion of session join request
-	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+	virtual void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 };

@@ -224,8 +224,18 @@ void UMyGameInstanceCPP::OnFindSessionsComplete(bool bWasSuccessful)
 	}
 }
 
+bool UMyGameInstanceCPP::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults)
+{
+	return false;
+}
+
+bool UMyGameInstanceCPP::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult)
+{
+	return false;
+}
+
 bool UMyGameInstanceCPP::JoinSession(TSharedPtr<FUniqueNetId> UserId, FName SessionName,
-	const FOnlineSessionSearchResult& SearchResult)
+                                     const FOnlineSessionSearchResult& SearchResult)
 {
 	bool bSuccesssful = false;
 
