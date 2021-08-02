@@ -26,11 +26,15 @@ public:
 	FString LanPlayerName() const;
 	void SetLanPlayerName(const FString& LanPlayerName);
 
-	bool HostSession(TSharedPtr<FUniqueNetId> UserId,
+	/* create/host session */
+	
+	bool HostSession(
+		const TSharedPtr<const FUniqueNetId> UserId,
 		FName SessionName,
 		bool bIsLAN,
 		bool bIsPresence,
-		int32 MaxNumPlayers);
+		int32 MaxNumPlayers
+		);
 
 	//delegates for creating and starting session completion respectively
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
@@ -45,8 +49,10 @@ public:
 	//runs on completion of session start request
 	virtual void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
 
+	/* finding session */
+	
 	//find online session
-	void FindSessions(TSharedPtr<FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
+	void FindSessions(const TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
 
 	//del. for searching sessions
 	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
@@ -56,12 +62,14 @@ public:
 	//delegate func fired when search query for sessions is complete
 	void OnFindSessionsComplete(bool bWasSuccessful);
 
+	/* joining session */
+	
 	//these (and their defs) are copied from the base class to prevent build warnings
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults);
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult);
 	
 	//join session via a search result
-	virtual bool JoinSession(TSharedPtr<FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
+	virtual bool JoinSession(const TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
 
 	//del. for joining a session
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
@@ -70,4 +78,27 @@ public:
 
 	//del. func run upon completion of session join request
 	virtual void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	/* destroying session */
+	
+	//del. for destroying session
+	FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegate;
+	//handle registered to del. for destroying a session
+	FDelegateHandle OnDestroySessionCompleteDelegateHandle;
+
+	//del. func run when destroying online session
+	virtual void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+
+	//BP-callable funcs
+	UFUNCTION(BlueprintCallable)
+	void StartOnlineGame();
+
+	UFUNCTION(BlueprintCallable)
+	void FindOnlineGames();
+
+	UFUNCTION(BlueprintCallable)
+	void JoinOnlineGame();
+
+	UFUNCTION(BlueprintCallable)
+	void DestroySessionAndLeaveGame();
 };

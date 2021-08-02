@@ -23,6 +23,10 @@ UMyGameInstanceCPP::UMyGameInstanceCPP(const FObjectInitializer& ObjectInitializ
 	//bind func for joining a session
 	this->OnJoinSessionCompleteDelegate =
 		FOnJoinSessionCompleteDelegate::CreateUObject(this, &UMyGameInstanceCPP::OnJoinSessionComplete);
+
+	//bind func for deleting session
+	this->OnDestroySessionCompleteDelegate =
+		FOnDestroySessionCompleteDelegate::CreateUObject(this, &UMyGameInstanceCPP::OnDestroySessionComplete);
 }
 
 FString UMyGameInstanceCPP::LanPlayerName() const
@@ -35,11 +39,13 @@ void UMyGameInstanceCPP::SetLanPlayerName(const FString& LanPlayerName)
 	LANPlayerName = LanPlayerName;
 }
 
-bool UMyGameInstanceCPP::HostSession(TSharedPtr<FUniqueNetId> UserId,
+bool UMyGameInstanceCPP::HostSession(
+	const TSharedPtr<const FUniqueNetId> UserId,
 	FName SessionName,
 	bool bIsLAN,
 	bool bIsPresence,
-	int32 MaxNumPlayers)
+	int32 MaxNumPlayers
+	)
 {
 	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
 
@@ -141,7 +147,7 @@ void UMyGameInstanceCPP::OnStartOnlineGameComplete(FName SessionName, bool bWasS
 		UGameplayStatics::OpenLevel(GetWorld(), "LevelName", true, "listen");
 }
 
-void UMyGameInstanceCPP::FindSessions(TSharedPtr<FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence)
+void UMyGameInstanceCPP::FindSessions(const TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence)
 {
 	//get OnlineSubsystem
 	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
@@ -234,7 +240,7 @@ bool UMyGameInstanceCPP::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSes
 	return false;
 }
 
-bool UMyGameInstanceCPP::JoinSession(TSharedPtr<FUniqueNetId> UserId, FName SessionName,
+bool UMyGameInstanceCPP::JoinSession(const TSharedPtr<const FUniqueNetId> UserId, FName SessionName,
                                      const FOnlineSessionSearchResult& SearchResult)
 {
 	bool bSuccesssful = false;
@@ -293,6 +299,80 @@ void UMyGameInstanceCPP::OnJoinSessionComplete(FName SessionName, EOnJoinSession
 				//run client travel
 				PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
 			}
+		}
+	}
+}
+
+void UMyGameInstanceCPP::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		10.f,
+		FColor::Blue,
+		FString::Printf(TEXT("OnDestroySessionComplete %s, %d"), *SessionName.ToString(), bWasSuccessful));
+
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if(OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+
+		if(Sessions.IsValid())
+		{
+			//clear del.
+			Sessions->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateHandle);
+
+			//load another level on success
+			if(bWasSuccessful)
+			{
+				UGameplayStatics::OpenLevel(GetWorld(), "BlankLevel", true);
+			}
+		}
+	}
+}
+
+void UMyGameInstanceCPP::StartOnlineGame()
+{
+	ULocalPlayer* const Player = GetFirstGamePlayer();
+	this->HostSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, true, true, 4);
+}
+
+void UMyGameInstanceCPP::FindOnlineGames()
+{
+	ULocalPlayer* const Player = GetFirstGamePlayer();
+	this->FindSessions(Player->GetPreferredUniqueNetId().GetUniqueNetId(), true, true);
+}
+
+void UMyGameInstanceCPP::JoinOnlineGame()
+{
+	ULocalPlayer* const Player = GetFirstGamePlayer();
+	FOnlineSessionSearchResult SearchResult;
+
+	if(SessionSearch->SearchResults.Num() > 0)
+	{
+		for(int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
+		{
+			if(this->SessionSearch->SearchResults[i].Session.OwningUserId != Player->GetPreferredUniqueNetId().GetUniqueNetId())
+			{
+				SearchResult = this->SessionSearch->SearchResults[i];
+
+				JoinSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SearchResult);
+				return;
+			}
+		}
+		
+	}
+}
+
+void UMyGameInstanceCPP::DestroySessionAndLeaveGame()
+{
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if(OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+		if(Sessions.IsValid())
+		{
+			Sessions->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegate);
+			Sessions->DestroySession(GameSessionName);
 		}
 	}
 }
