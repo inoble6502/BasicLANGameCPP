@@ -18,6 +18,7 @@ class BASICLANGAMECPP_API UMyGameInstanceCPP : public UGameInstance
 protected:
 	FString LANPlayerName;
 	TSharedPtr<FOnlineSessionSettings> SessionSettings;
+	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 	
 public:
 	UMyGameInstanceCPP(const FObjectInitializer& ObjectInitializer);
@@ -43,4 +44,26 @@ public:
 	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	//runs on completion of session start request
 	virtual void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
+
+	//find online session
+	void FindSessions(TSharedPtr<FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
+
+	//del. for searching sessions
+	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
+	//handle to above del.
+	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
+
+	//delegate func fired when search query for sessions is complete
+	void OnFindSessionsComplete(bool bWasSuccessful);
+
+	//join session via a search result
+	bool JoinSession(TSharedPtr<FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
+
+	//del. for joining a session
+	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
+	//del. handle for joining session
+	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
+
+	//del. func run upon completion of session join request
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 };
