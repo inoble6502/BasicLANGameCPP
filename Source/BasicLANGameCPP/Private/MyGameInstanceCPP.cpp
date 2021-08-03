@@ -29,12 +29,12 @@ UMyGameInstanceCPP::UMyGameInstanceCPP(const FObjectInitializer& ObjectInitializ
 		FOnDestroySessionCompleteDelegate::CreateUObject(this, &UMyGameInstanceCPP::OnDestroySessionComplete);
 }
 
-FString UMyGameInstanceCPP::LanPlayerName() const
+FName UMyGameInstanceCPP::LanPlayerName() const
 {
 	return LANPlayerName;
 }
 
-void UMyGameInstanceCPP::SetLanPlayerName(const FString& LanPlayerName)
+void UMyGameInstanceCPP::SetLanPlayerName(const FName& LanPlayerName)
 {
 	LANPlayerName = LanPlayerName;
 }
@@ -77,7 +77,7 @@ bool UMyGameInstanceCPP::HostSession(
 		this->SessionSettings->bAllowJoinViaPresence = true;
 		this->SessionSettings->bAllowJoinViaPresenceFriendsOnly = true;
 
-		this->SessionSettings->Set(SETTING_MAPNAME, FString("Map Name"), EOnlineDataAdvertisementType::ViaOnlineService);
+		this->SessionSettings->Set(SETTING_MAPNAME, FString("BlankLevelLAN"), EOnlineDataAdvertisementType::ViaOnlineService);
 
 		this->OnCreateSessionCompleteDelegateHandle =
 			Sessions->AddOnCreateSessionCompleteDelegate_Handle(this->OnCreateSessionCompleteDelegate);
@@ -144,7 +144,7 @@ void UMyGameInstanceCPP::OnStartOnlineGameComplete(FName SessionName, bool bWasS
 	}
 
 	if(bWasSuccessful)
-		UGameplayStatics::OpenLevel(GetWorld(), "LevelName", true, "listen");
+		UGameplayStatics::OpenLevel(GetWorld(), "BlankLevelLAN", true, "listen");
 }
 
 void UMyGameInstanceCPP::FindSessions(const TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence)
@@ -333,7 +333,13 @@ void UMyGameInstanceCPP::OnDestroySessionComplete(FName SessionName, bool bWasSu
 void UMyGameInstanceCPP::StartOnlineGame()
 {
 	ULocalPlayer* const Player = GetFirstGamePlayer();
-	this->HostSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, true, true, 4);
+	this->HostSession(
+		Player->GetPreferredUniqueNetId().GetUniqueNetId(),
+		GameSessionName,
+		true,
+		true,
+		4
+		);
 }
 
 void UMyGameInstanceCPP::FindOnlineGames()

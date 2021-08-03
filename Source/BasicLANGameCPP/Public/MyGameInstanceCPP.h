@@ -16,15 +16,18 @@ class BASICLANGAMECPP_API UMyGameInstanceCPP : public UGameInstance
 	GENERATED_BODY()
 
 protected:
-	FString LANPlayerName;
+	FName LANPlayerName;
 	TSharedPtr<FOnlineSessionSettings> SessionSettings;
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 	
 public:
 	UMyGameInstanceCPP(const FObjectInitializer& ObjectInitializer);
+
+	UFUNCTION(BlueprintCallable)
+	FName LanPlayerName() const;
 	
-	FString LanPlayerName() const;
-	void SetLanPlayerName(const FString& LanPlayerName);
+	UFUNCTION(BlueprintCallable)
+	void SetLanPlayerName(const FName& LanPlayerName);
 
 	/* create/host session */
 	
