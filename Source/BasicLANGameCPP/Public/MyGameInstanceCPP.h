@@ -68,8 +68,8 @@ public:
 	/* joining session */
 	
 	//these (and their defs) are copied from the base class to prevent build warnings
-	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults);
-	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult);
+	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults) override;
+	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult) override;
 	
 	//join session via a search result
 	virtual bool JoinSession(const TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
@@ -104,4 +104,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void DestroySessionAndLeaveGame();
+
+	UFUNCTION(BlueprintCallable)
+	void JoinSessionViaIP(const FString& ip);
+
+	UFUNCTION(BlueprintCallable)
+	void JoinSessionViaIPAndPort(const FString& ip, const FString& port);
+
+	UFUNCTION(BlueprintCallable)
+	void ServerTravelToLevel(const FString& levelName);
+
+	UFUNCTION(BlueprintCallable)
+	int NumberOfSessionSearchResults();
 };

@@ -411,3 +411,30 @@ void UMyGameInstanceCPP::DestroySessionAndLeaveGame()
 		}
 	}
 }
+
+/* typically relying on console commands isn't recommended but for the purpose
+ * of this project it's serviceable
+ */
+
+void UMyGameInstanceCPP::JoinSessionViaIP(const FString& ip)
+{
+	FString command = "open " + ip + ":7777";
+	this->GetFirstGamePlayer()->ConsoleCommand(command);
+}
+
+void UMyGameInstanceCPP::JoinSessionViaIPAndPort(const FString& ip, const FString& port)
+{
+	FString command = "open " + ip + ":" + port;
+	this->GetFirstGamePlayer()->ConsoleCommand(command);
+}
+
+void UMyGameInstanceCPP::ServerTravelToLevel(const FString& levelName)
+{
+	FString command = "ServerTravel " + levelName;
+	this->GetFirstGamePlayer()->ConsoleCommand(command);
+}
+
+int UMyGameInstanceCPP::NumberOfSessionSearchResults()
+{
+	return this->SessionSearch->SearchResults.Num();
+}
