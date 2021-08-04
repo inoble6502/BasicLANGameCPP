@@ -13,10 +13,15 @@ void ALANPlayerStateCPP::SetLanPlayerName(const FName& LanPlayerName)
 	LANPlayerName = LanPlayerName;
 }
 
-void ALANPlayerStateCPP::ChangeLanPlayerName(const FName& name)
+void ALANPlayerStateCPP::ChangeLanPlayerName_Implementation(const FName& name)
 {
 	this->SetLanPlayerName(name);
 }
+
+// void ALANPlayerStateCPP::ChangeLanPlayerName(const FName& name)
+// {
+// 	this->SetLanPlayerName(name);
+// }
 
 void ALANPlayerStateCPP::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

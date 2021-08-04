@@ -16,13 +16,13 @@ class BASICLANGAMECPP_API ALANPlayerStateCPP : public APlayerState
 	GENERATED_BODY()
 
 public:
-	//UPROPERTY(Replicated)
+	UPROPERTY(Replicated)
 	FName LANPlayerName;
 	
 	FName LanPlayerName() const;
 	void SetLanPlayerName(const FName& LanPlayerName);
 
-	//UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable)
 	void ChangeLanPlayerName(const FName& name);
 
 	//required for replicating variables
