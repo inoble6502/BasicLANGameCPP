@@ -204,7 +204,7 @@ void UMyGameInstanceCPP::OnFindSessionsComplete(bool bWasSuccessful)
 			//clears del. handle
 			Sessions->ClearOnFindSessionsCompleteDelegate_Handle(this->OnFindSessionsCompleteDelegateHandle);
 
-			//print num of sarch results
+			//print num of search results
 			GEngine->AddOnScreenDebugMessage(
 				-1,
 				10.f,
@@ -237,13 +237,33 @@ bool UMyGameInstanceCPP::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionInd
 
 bool UMyGameInstanceCPP::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult)
 {
-	return false;
+	bool bSuccessful = false;
+
+	//get online subsystem
+	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
+	if(OnlineSub)
+	{
+		//retrieve session interface
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+
+		if(Sessions.IsValid() && IsValid(LocalPlayer))
+		{
+			//set del. handle
+			this->OnJoinSessionCompleteDelegateHandle =
+				Sessions->AddOnJoinSessionCompleteDelegate_Handle(this->OnJoinSessionCompleteDelegate);
+
+			//call "join session" function with SearchResult
+			bSuccessful = Sessions->JoinSession(LocalPlayer->GetUniqueID(), GameSessionName, SearchResult);
+		}
+	}
+
+	return bSuccessful;
 }
 
 bool UMyGameInstanceCPP::JoinSession(const TSharedPtr<const FUniqueNetId> UserId, FName SessionName,
                                      const FOnlineSessionSearchResult& SearchResult)
 {
-	bool bSuccesssful = false;
+	bool bSuccessful = false;
 
 	//get online subsystem
 	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
@@ -259,11 +279,11 @@ bool UMyGameInstanceCPP::JoinSession(const TSharedPtr<const FUniqueNetId> UserId
 				Sessions->AddOnJoinSessionCompleteDelegate_Handle(this->OnJoinSessionCompleteDelegate);
 
 			//call "join session" function with SearchResult
-			bSuccesssful = Sessions->JoinSession(*UserId, SessionName, SearchResult);
+			bSuccessful = Sessions->JoinSession(*UserId, SessionName, SearchResult);
 		}
 	}
 
-	return bSuccesssful;
+	return bSuccessful;
 }
 
 void UMyGameInstanceCPP::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
@@ -348,24 +368,33 @@ void UMyGameInstanceCPP::FindOnlineGames()
 	this->FindSessions(Player->GetPreferredUniqueNetId().GetUniqueNetId(), true, true);
 }
 
+//if running through Rider, this works if running more than one "host" sessions, may have to do with running on the same system
+//otherwise, works on Standalone play 
 void UMyGameInstanceCPP::JoinOnlineGame()
 {
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		10.f,
+		FColor::White,
+		FString::Printf(TEXT("JoinOnlineGame")));
+	
 	ULocalPlayer* const Player = GetFirstGamePlayer();
-	FOnlineSessionSearchResult SearchResult;
 
-	if(SessionSearch->SearchResults.Num() > 0)
+	//if there is more than one session then join the first one available given the conditions
+	if(this->SessionSearch->SearchResults.Num() > 0)
 	{
-		for(int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
+		FOnlineSessionSearchResult SearchResult;
+
+		for(int32 i = 0; i < this->SessionSearch->SearchResults.Num(); ++i)
 		{
 			if(this->SessionSearch->SearchResults[i].Session.OwningUserId != Player->GetPreferredUniqueNetId().GetUniqueNetId())
 			{
 				SearchResult = this->SessionSearch->SearchResults[i];
-
-				JoinSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SearchResult);
-				return;
+				//JoinSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SearchResult); //won't join
+				JoinSession(this->GetFirstLocalPlayerController()->GetLocalPlayer(), SearchResult);
+				break;
 			}
 		}
-		
 	}
 }
 
