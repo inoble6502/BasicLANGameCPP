@@ -419,18 +419,39 @@ void UMyGameInstanceCPP::DestroySessionAndLeaveGame()
 void UMyGameInstanceCPP::JoinSessionViaIP(const FString& ip)
 {
 	FString command = "open " + ip + ":7777";
+
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		10.f,
+		FColor::White,
+		command);
+	
 	this->GetFirstGamePlayer()->ConsoleCommand(command);
 }
 
 void UMyGameInstanceCPP::JoinSessionViaIPAndPort(const FString& ip, const FString& port)
 {
 	FString command = "open " + ip + ":" + port;
+
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		10.f,
+		FColor::White,
+		command);
+	
 	this->GetFirstGamePlayer()->ConsoleCommand(command);
 }
 
 void UMyGameInstanceCPP::ServerTravelToLevel(const FString& levelName)
 {
 	FString command = "ServerTravel " + levelName;
+
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		10.f,
+		FColor::White,
+		command);
+	
 	this->GetFirstGamePlayer()->ConsoleCommand(command);
 }
 
