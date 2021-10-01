@@ -92,7 +92,7 @@ public:
 	//del. func run when destroying online session
 	virtual void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
-	//BP-callable funcs
+	//BP-callable functions
 	UFUNCTION(BlueprintCallable)
 	void StartOnlineGame();
 

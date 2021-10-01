@@ -303,7 +303,7 @@ void UMyGameInstanceCPP::OnJoinSessionComplete(FName SessionName, EOnJoinSession
 
 		if(Sessions.IsValid())
 		{
-			//clear del.
+			//clear delegate
 			Sessions->ClearOnJoinSessionCompleteDelegate_Handle(this->OnJoinSessionCompleteDelegateHandle);
 
 			//get first local PlayCon, for client travel to get to the server map
@@ -377,25 +377,35 @@ void UMyGameInstanceCPP::JoinOnlineGame()
 		10.f,
 		FColor::White,
 		FString::Printf(TEXT("JoinOnlineGame")));
+
+	if(!this->SessionSearch)
+	{
+		GEngine->AddOnScreenDebugMessage(
+		-1,
+		10.f,
+		FColor::Red,
+		"SessionSearch does not exist");
+		return;
+	}
 	
 	ULocalPlayer* const Player = GetFirstGamePlayer();
 
-	//if there is more than one session then join the first one available given the conditions
-	if(this->SessionSearch->SearchResults.Num() > 0)
-	{
-		FOnlineSessionSearchResult SearchResult;
-
-		for(int32 i = 0; i < this->SessionSearch->SearchResults.Num(); ++i)
-		{
-			if(this->SessionSearch->SearchResults[i].Session.OwningUserId != Player->GetPreferredUniqueNetId().GetUniqueNetId())
-			{
-				SearchResult = this->SessionSearch->SearchResults[i];
-				//JoinSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SearchResult); //won't join
-				JoinSession(this->GetFirstLocalPlayerController()->GetLocalPlayer(), SearchResult);
-				break;
-			}
-		}
-	}
+	 //if there is more than one session then join the first one available given the conditions
+	 if(this->SessionSearch->SearchResults.Num() > 0)
+	 {
+	 	FOnlineSessionSearchResult SearchResult;
+	
+	 	for(int32 i = 0; i < this->SessionSearch->SearchResults.Num(); ++i)
+	 	{
+	 		if(this->SessionSearch->SearchResults[i].Session.OwningUserId != Player->GetPreferredUniqueNetId().GetUniqueNetId())
+	 		{
+	 			SearchResult = this->SessionSearch->SearchResults[i];
+	 			//JoinSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SearchResult); //won't join
+	 			JoinSession(this->GetFirstLocalPlayerController()->GetLocalPlayer(), SearchResult);
+	 			break;
+	 		}
+	 	}
+	 }
 }
 
 void UMyGameInstanceCPP::DestroySessionAndLeaveGame()

@@ -16,14 +16,16 @@ class BASICLANGAMECPP_API ALANPlayerStateCPP : public APlayerState
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Replicated)
+	ALANPlayerStateCPP();
+	
+	UPROPERTY(Replicated, EditAnywhere)
 	FName LANPlayerName; //name given to players on LAN game session
 	
 	UFUNCTION(BlueprintCallable)
-	FName LanPlayerName() const;
+	FName GetLanPlayerName() const;
 	
 	UFUNCTION(BlueprintCallable)
-	void SetLanPlayerName(const FName& LanPlayerName);
+	void SetLanPlayerName(const FName& PlayerName);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ChangeLanPlayerName(const FName& name);

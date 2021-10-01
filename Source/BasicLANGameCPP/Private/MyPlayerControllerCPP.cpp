@@ -4,30 +4,38 @@
 #include "MyPlayerControllerCPP.h"
 
 
-TSharedPtr<UMyGameInstanceCPP> AMyPlayerControllerCPP::Instance1() const
+AMyPlayerControllerCPP::AMyPlayerControllerCPP()
+{
+	this->temp = "";
+	this->IsNameSet = 0;
+	this->PlayerState = 0;
+	this->Instance = 0;
+}
+
+UMyGameInstanceCPP* AMyPlayerControllerCPP::Instance1() const
 {
 	return Instance;
 }
 
-void AMyPlayerControllerCPP::SetInstance(const TSharedPtr<UMyGameInstanceCPP>& GmInstance)
+void AMyPlayerControllerCPP::SetInstance(UMyGameInstanceCPP* GmInstance)
 {
-	this->Instance = Instance;
+	this->Instance = GmInstance;
 }
 
-TSharedPtr<ALANPlayerStateCPP> AMyPlayerControllerCPP::PlayerState1() const
+ALANPlayerStateCPP* AMyPlayerControllerCPP::PlayerState1() const
 {
 	return PlayerState;
 }
 
-void AMyPlayerControllerCPP::SetPlayerState(const TSharedPtr<ALANPlayerStateCPP>& PState)
+void AMyPlayerControllerCPP::SetPlayerState(ALANPlayerStateCPP* PState)
 {
 	this->PlayerState = PlayerState;
 }
 
 void AMyPlayerControllerCPP::BeginPlay()
 {
-	this->Instance = MakeShareable(Cast<UMyGameInstanceCPP>(GetWorld()->GetGameInstance()));;
-	this->PlayerState = MakeShareable(this->GetPlayerState<ALANPlayerStateCPP>());
+	this->Instance = Cast<UMyGameInstanceCPP>(GetWorld()->GetGameInstance());
+	this->PlayerState = this->GetPlayerState<ALANPlayerStateCPP>();
 	this->IsNameSet = false;
 	
 	//this->temp = this->Instance->LanPlayerName();
@@ -39,11 +47,11 @@ void AMyPlayerControllerCPP::Tick(float DeltaSeconds)
 	if(this->IsNameSet)
 		return;
 
-	if(this->PlayerState.IsValid())
+	if(this->PlayerState)
 	{
 		if(!HasAuthority())
 		{
-			if(!(this->PlayerState->LanPlayerName() == this->temp))
+			if(!(this->PlayerState->GetLanPlayerName() == this->temp))
 			{
 				this->PlayerState->ChangeLanPlayerName(temp);
 				this->IsNameSet = true;
@@ -52,7 +60,7 @@ void AMyPlayerControllerCPP::Tick(float DeltaSeconds)
 	}
 	else
 	{
-		this->PlayerState = MakeShareable(this->GetPlayerState<ALANPlayerStateCPP>());
+		this->PlayerState = this->GetPlayerState<ALANPlayerStateCPP>();
 	}
 }
 
@@ -93,7 +101,17 @@ void AMyPlayerControllerCPP::PlayConJoinSession()
 	if(!gi)
 		return;
 
-	gi->JoinOnlineGame();
+	gi->FindOnlineGames();
+
+	GetWorld()->GetTimerManager().SetTimer(
+		this->PlayConTimerHandle,
+		[&]()
+		{
+			//have to cast again to prevent exception access violation error
+			Cast<UMyGameInstanceCPP>(GetWorld()->GetGameInstance())->JoinOnlineGame();
+		},
+		10,
+		false);
 }
 
 void AMyPlayerControllerCPP::PlayConJoinViaIP(FString ip)
@@ -119,8 +137,5 @@ void AMyPlayerControllerCPP::PlayConJoinViaIPAndPort(FString ip, FString port)
 
 void AMyPlayerControllerCPP::PlayConChangeNameOnPlayerState()
 {
-	if(!this->PlayerState)
-		return;
-
-	this->PlayerState->ChangeLanPlayerName(temp);
+	this->GetPlayerState<ALANPlayerStateCPP>()->ChangeLanPlayerName(Cast<UMyGameInstanceCPP>(GetWorld()->GetGameInstance())->LanPlayerName());
 }

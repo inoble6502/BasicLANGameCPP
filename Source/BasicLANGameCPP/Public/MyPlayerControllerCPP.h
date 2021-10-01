@@ -18,16 +18,21 @@ class BASICLANGAMECPP_API AMyPlayerControllerCPP : public APlayerController
 	GENERATED_BODY()
 
 private:
-	TSharedPtr<ALANPlayerStateCPP> PlayerState = 0;
-	TSharedPtr<UMyGameInstanceCPP> Instance = 0;
-	FName temp = "";
+	ALANPlayerStateCPP* PlayerState = 0;
+	UMyGameInstanceCPP* Instance = 0;
+	
+	FName temp = " ";
 	bool IsNameSet = 0;
 
+	FTimerDelegate PlayConTimerDelegate;
+	FTimerHandle PlayConTimerHandle;
+	
 public:
-	TSharedPtr<UMyGameInstanceCPP> Instance1() const;
-	void SetInstance(const TSharedPtr<UMyGameInstanceCPP>& GmInstance);
-	TSharedPtr<ALANPlayerStateCPP> PlayerState1() const;
-	void SetPlayerState(const TSharedPtr<ALANPlayerStateCPP>& PState);
+	AMyPlayerControllerCPP();
+	UMyGameInstanceCPP* Instance1() const;
+	void SetInstance(UMyGameInstanceCPP* GmInstance);
+	ALANPlayerStateCPP* PlayerState1() const;
+	void SetPlayerState(ALANPlayerStateCPP* PState);
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;

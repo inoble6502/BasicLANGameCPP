@@ -1,16 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "LANPlayerStateCPP.h"
-
 #include "Net/UnrealNetwork.h"
 
-FName ALANPlayerStateCPP::LanPlayerName() const
+ALANPlayerStateCPP::ALANPlayerStateCPP()
 {
-	return LANPlayerName;
+	//this->LANPlayerName = "";
 }
 
-void ALANPlayerStateCPP::SetLanPlayerName(const FName& LanPlayerName)
+FName ALANPlayerStateCPP::GetLanPlayerName() const
 {
-	LANPlayerName = LanPlayerName;
+	return this->LANPlayerName;
+}
+
+void ALANPlayerStateCPP::SetLanPlayerName(const FName& PlayerName)
+{
+	LANPlayerName = PlayerName;
 }
 
 void ALANPlayerStateCPP::ChangeLanPlayerName_Implementation(const FName& name)
